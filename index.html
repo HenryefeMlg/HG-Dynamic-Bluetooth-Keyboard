@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Sanal Konsol Kumandası & Akıllı Tema</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <button id="settings-btn" class="icon-btn">⚙️</button>
+
+    <div id="gamepad-area">
+        <p id="info-text">Ayarlar menüsünden joystick ve butonlar ekleyin.</p>
+    </div>
+
+    <div id="settings-panel" class="hidden">
+        <div class="panel-header">
+            <h3>Gelişmiş Kumanda Ayarları</h3>
+            <button id="close-settings-btn">✖</button>
+        </div>
+        <div class="panel-content">
+            
+            <div class="setting-group">
+                <button id="connect-bt-btn">🔗 Bluetooth Cihazına Bağlan</button>
+                <span id="bt-status">Bağlı Değil</span>
+            </div>
+            <hr>
+
+            <div class="setting-group">
+                <label for="bg-color-picker">Arka Plan Rengi:</label>
+                <input type="color" id="bg-color-picker" value="#121214">
+            </div>
+
+            <div class="setting-group">
+                <label for="btn-color-picker">Butonların Rengi:</label>
+                <input type="color" id="btn-color-picker" value="#00e676">
+            </div>
+
+            <div class="setting-group">
+                <label for="text-color-picker">Buton Yazı Rengi:</label>
+                <input type="color" id="text-color-picker" value="#121214">
+            </div>
+
+            <div class="setting-group">
+                <label for="font-select">Yazı Tipi (Font):</label>
+                <select id="font-select">
+                    <option value="sans-serif">Sans-Serif (Normal)</option>
+                    <option value="serif">Serif (Klasik)</option>
+                    <option value="monospace">Monospace</option>
+                    <option value="fantasy">Fantasy</option>
+                </select>
+            </div>
+            <hr>
+            
+            <div class="setting-group">
+                <label for="touchpad-action">Touchpad Tıklama Aksiyonu:</label>
+                <select id="touchpad-action">
+                    <option value="MOUSE_LEFT">Mouse Sol Tık (Ateş Etme)</option>
+                    <option value="KEY_SPACE">Boşluk Tuşu (Space)</option>
+                    <option value="KEY_E">E Tuşu</option>
+                    <option value="NONE">Sadece Fare Hareketi</option>
+                </select>
+            </div>
+
+            <div class="setting-group">
+                <div style="display: flex; justify-content: space-between;">
+                    <label for="sensitivity-slider">Mouse Hassasiyeti:</label>
+                    <span id="sensitivity-value">1.5x</span>
+                </div>
+                <input type="range" id="sensitivity-slider" min="0.1" max="5.0" step="0.1" value="1.5">
+            </div>
+            <hr>
+
+            <div class="setting-group">
+                <label>Joystick Modülleri:</label>
+                <button id="add-normal-joy-btn" style="background: #2196f3; color: white;">🕹️ Normal Joystick Ekle</button>
+                <button id="add-wasd-joy-btn" style="background: #9c27b0; color: white; margin-top: 5px;">🕹️ WASD Joystick Ekle</button>
+            </div>
+            <hr>
+            
+            <div class="setting-group">
+                <label>Tuş veya Konsol Butonu Seçin:</label>
+                <div class="input-capture-zone" style="display: flex; gap: 5px;">
+                    <input type="text" id="key-input" placeholder="Tuşa basın..." readonly style="flex: 1;">
+                    <select id="console-key-select" style="width: auto; max-width: 110px;">
+                        <option value="">-- Konsol --</option>
+                        <option value="L1">L1</option>
+                        <option value="R1">R1</option>
+                        <option value="L2">L2</option>
+                        <option value="R2">R2</option>
+                        <option value="L3">L3</option>
+                        <option value="R3">R3</option>
+                        <option value="SELECT">SELECT</option>
+                        <option value="START">START</option>
+                    </select>
+                </div>
+                <button id="add-button-btn">➕ Ekrana Buton Ekle</button>
+            </div>
+            <hr>
+
+            <div class="setting-group">
+                <button id="save-layout-btn">💾 Düzeni Kaydet</button>
+                <button id="clear-layout-btn" style="background: #ef4444; color: white; margin-top: 5px;">🗑️ Hafızayı Sıfırla</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="custom-confirm" class="confirm-overlay hidden">
+        <div class="confirm-box">
+            <h4>Akıllı Renk Uyumu</h4>
+            <p id="confirm-message">Renk düzeni algılanıyor...</p>
+            <div class="confirm-buttons">
+                <button id="confirm-yes" style="background: #00e676; color: #121214;">Evet, Ayarla</button>
+                <button id="confirm-no" style="background: #ef4444; color: white;">Hayır, Kalsın</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
