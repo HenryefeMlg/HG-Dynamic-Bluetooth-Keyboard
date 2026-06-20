@@ -383,4 +383,4 @@ function sendBluetoothData(key, state) {
             console.error("Veri gönderilemedi:", e);
         }
     }
-                              }
+            }
