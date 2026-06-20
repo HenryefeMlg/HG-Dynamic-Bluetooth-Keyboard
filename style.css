@@ -15,17 +15,39 @@ body, html {
     color: #fff;
 }
 
-#settings-btn {
+#top-bar {
     position: absolute;
     top: 15px;
     left: 15px;
     z-index: 10;
+    display: flex;
+    gap: 10px;
+}
+
+.icon-btn {
     background: #29292e;
     border: 1px solid #4d4d57;
-    font-size: 24px;
+    color: white;
+    font-size: 14px;
+    padding: 10px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+#settings-btn {
     padding: 10px;
     border-radius: 50%;
-    cursor: pointer;
+    font-size: 20px;
+}
+
+#lock-btn.edit-active {
+    background: #ff9800;
+    color: #121214;
+    border-color: #ff9800;
 }
 
 #gamepad-area {
@@ -76,7 +98,7 @@ button:active { opacity: 0.8; }
 hr { border: 0; border-top: 1px solid #29292e; margin: 15px 0; }
 #sensitivity-value { color: #00e676; font-weight: bold; }
 
-/* Dinamik Butonlar */
+/* Dinamik Elemanlar */
 .custom-btn {
     position: absolute;
     border: 2px solid #00e676;
@@ -85,14 +107,20 @@ hr { border: 0; border-top: 1px solid #29292e; margin: 15px 0; }
     align-items: center;
     justify-content: center;
     font-weight: bold;
-    cursor: move;
     text-align: center;
     padding: 5px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
     touch-action: none;
 }
 
-/* Joystick Yapıları */
+/* Edit Modunda Kılavuz Çizgileri */
+body.edit-mode-on .custom-btn, body.edit-mode-on .custom-joystick {
+    outline: 2px dashed #ff9800 !important;
+    outline-offset: 4px;
+    cursor: move;
+}
+
+/* Joystick Tasarımları */
 .custom-joystick {
     position: absolute;
     width: 120px;
@@ -115,9 +143,8 @@ hr { border: 0; border-top: 1px solid #29292e; margin: 15px 0; }
     pointer-events: none;
 }
 .custom-joystick.wasd-type .joystick-knob { background: #9c27b0; }
-.resize-handle { width: 16px; height: 16px; background: #ff9800; position: absolute; bottom: 0; right: 0; border-radius: 50%; cursor: se-resize; z-index: 5; }
 
-/* CONFIRM POPUP OVERLAY */
+/* CONFIRM POPUP */
 .confirm-overlay {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
