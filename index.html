@@ -3,23 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Sanal Konsol Kumandası & Akıllı Tema</title>
+    <title>Gelişmiş Sanal Kumanda Konsolu</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div id="top-bar">
-        <button id="settings-btn" class="icon-btn">⚙️</button>
+        <button id="settings-btn" class="icon-btn">⚙️ Ayarlar</button>
         <button id="lock-btn" class="icon-btn">🔓 Düzenleme Modu</button>
     </div>
 
     <div id="gamepad-area">
-        <p id="info-text">Ayarlar menüsünden modülleri ekleyin, düzenlemek için modu açın.</p>
+        <p id="info-text">Ayarlar menüsünden gelişmiş modülleri ekleyin.</p>
     </div>
 
     <div id="settings-panel" class="hidden">
         <div class="panel-header">
-            <h3>Gelişmiş Kumanda Ayarları</h3>
+            <h3>Kumanda Laboratuvarı</h3>
             <button id="close-settings-btn">✖</button>
         </div>
         <div class="panel-content">
@@ -34,47 +34,16 @@
                 <label for="bg-color-picker">Arka Plan Rengi:</label>
                 <input type="color" id="bg-color-picker" value="#121214">
             </div>
-
             <div class="setting-group">
                 <label for="btn-color-picker">Butonların Rengi:</label>
                 <input type="color" id="btn-color-picker" value="#00e676">
             </div>
-
             <div class="setting-group">
                 <label for="text-color-picker">Buton Yazı Rengi:</label>
                 <input type="color" id="text-color-picker" value="#121214">
             </div>
-
-            <div class="setting-group">
-                <label for="font-select">Yazı Tipi (Font):</label>
-                <select id="font-select">
-                    <option value="sans-serif">Sans-Serif (Normal)</option>
-                    <option value="serif">Serif (Klasik)</option>
-                    <option value="monospace">Monospace</option>
-                    <option value="fantasy">Fantasy</option>
-                </select>
-            </div>
             <hr>
             
-            <div class="setting-group">
-                <label for="touchpad-action">Touchpad Tıklama Aksiyonu:</label>
-                <select id="touchpad-action">
-                    <option value="MOUSE_LEFT">Mouse Sol Tık</option>
-                    <option value="KEY_SPACE">Boşluk Tuşu (Space)</option>
-                    <option value="KEY_E">E Tuşu</option>
-                    <option value="NONE">Sadece Fare Hareketi</option>
-                </select>
-            </div>
-
-            <div class="setting-group">
-                <div style="display: flex; justify-content: space-between;">
-                    <label for="sensitivity-slider">Mouse Hassasiyeti:</label>
-                    <span id="sensitivity-value">1.5x</span>
-                </div>
-                <input type="range" id="sensitivity-slider" min="0.1" max="5.0" step="0.1" value="1.5">
-            </div>
-            <hr>
-
             <div class="setting-group">
                 <label>Joystick Modülleri:</label>
                 <button id="add-normal-joy-btn" style="background: #2196f3; color: white;">🕹️ Normal Joystick Ekle</button>
@@ -83,22 +52,39 @@
             <hr>
             
             <div class="setting-group">
-                <label>Tuş İsmi Yazın veya Konsoldan Seçin:</label>
-                <div style="display: flex; gap: 5px;">
-                    <input type="text" id="key-input" placeholder="Örn: E, F1, Shift, Space...">
-                    <select id="console-key-select" style="width: auto; max-width: 110px;">
-                        <option value="">-- Konsol --</option>
-                        <option value="L1">L1</option>
-                        <option value="R1">R1</option>
-                        <option value="L2">L2</option>
-                        <option value="R2">R2</option>
-                        <option value="L3">L3</option>
-                        <option value="R3">R3</option>
-                        <option value="SELECT">SELECT</option>
-                        <option value="START">START</option>
-                    </select>
+                <label><strong>1. Standart Tuş Ekle</strong></label>
+                <div style="position: relative;">
+                    <input type="text" id="key-input" placeholder="Örn: Shift, F1, Mouse 1..." autocomplete="off">
+                    <div id="autocomplete-list" class="autocomplete-suggestions hidden"></div>
                 </div>
-                <button id="add-button-btn" style="margin-top: 8px;">➕ Ekrana Buton Ekle</button>
+                <button id="add-button-btn" style="margin-top: 8px;">➕ Standart Buton Ekle</button>
+            </div>
+            <hr>
+
+            <div class="setting-group">
+                <label><strong>2. Metin Makro Butonu Ekle</strong></label>
+                <input type="text" id="macro-string-input" placeholder="Örn: Hello world! veya /spawn...">
+                <button id="add-macro-string-btn" style="background: #e91e63; color: white; margin-top: 8px;">📝 Metin Butonu Ekle</button>
+            </div>
+            <hr>
+
+            <div class="setting-group">
+                <label><strong>3. Kombinasyon Butonu Ekle (Kutu + Kutu)</strong></label>
+                
+                <div id="combo-boxes-container">
+                    <div class="combo-row">
+                        <input type="text" class="combo-box-input" placeholder="Ctrl" autocomplete="off">
+                        <span class="combo-plus">+</span>
+                        <input type="text" class="combo-box-input" placeholder="C" autocomplete="off">
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 5px; margin-top: 8px;">
+                    <button id="add-combo-box-field" style="background: #795548; color: white; padding: 8px;">➕ Kutu Ekle</button>
+                    <button id="remove-combo-box-field" style="background: #ff5722; color: white; padding: 8px;">🗑️ Son Kutuyu Sil</button>
+                </div>
+
+                <button id="add-combo-btn" style="background: #ff9800; color: white; margin-top: 8px;">🎛️ Kombinasyon Butonunu Ekle</button>
             </div>
             <hr>
 
