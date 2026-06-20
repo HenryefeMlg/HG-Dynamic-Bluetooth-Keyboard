@@ -287,29 +287,68 @@ saveLayoutBtn.addEventListener('click', () => {
 clearLayoutBtn.addEventListener('click', () => { if (confirm("Sıfırlansın mı?")) { localStorage.removeItem('gamepad_smart_theme'); location.reload(); } });
 
 // BLUETOOTH DOĞRULANMIŞ HABERLEŞME MODÜLÜ
+// BLUETOOTH EVRENSEL BAĞLANTI MOTORU
 connectBtBtn.addEventListener('click', async () => {
     try {
-        btStatus.innerText = "Aranıyor..."; btStatus.style.color = "#ff9800";
-        bluetoothDevice = await navigator.bluetooth.requestDevice({ filters: [{ services: [UART_SERVICE_UUID] }] });
+        btStatus.innerText = "Aranıyor..."; 
+        btStatus.style.color = "#ff9800";
+
+        // NOT: Klasik HC-05/06 modülleri web tarayıcılarda doğrudan görünmez. 
+        // Bu havuz, BLE dönüşümlü ve tüm standart UART servislerini kapsar.
+        bluetoothDevice = await navigator.bluetooth.requestDevice({
+            acceptAllDevices: true,
+            optionalServices: [
+                "0000ffe0-0000-1000-8000-00805f9b34fb", // Standart BLE/HM-10
+                "0000ffe1-0000-1000-8000-00805f9b34fb", // Standart TX/RX
+                "00001101-0000-1000-8000-00805f9b34fb"  // Seri Port Standart Profil
+            ]
+        });
+
         btStatus.innerText = "Bağlanıyor...";
         const server = await bluetoothDevice.gatt.connect();
-        const service = await server.getPrimaryService(UART_SERVICE_UUID);
-        bluetoothCharacteristic = await service.getCharacteristic(UART_TX_CHARACTERISTIC_UUID);
-        btStatus.innerText = "Bağlandı!"; btStatus.style.color = "#00e676";
-    } catch (error) { console.error(error); btStatus.innerText = "Hata!"; btStatus.style.color = "#ef4444"; }
+        
+        // Aktif servisleri tara ve ilk geçerli olanı yakala
+        const services = await server.getPrimaryServices();
+        if (services.length === 0) throw new Error("Cihazda aktif bir GATT servisi bulunamadı.");
+        
+        let targetService = services[0];
+        const characteristics = await targetService.getCharacteristics();
+        
+        if (characteristics.length > 0) {
+            bluetoothCharacteristic = characteristics[0];
+            btStatus.innerText = "Bağlandı!"; 
+            btStatus.style.color = "#00e676";
+        } else {
+            throw new Error("Yazılabilir veri kanalı (Characteristic) bulunamadı.");
+        }
+
+        bluetoothDevice.addEventListener('gattserverdisconnected', () => {
+            btStatus.innerText = "Bağlantı Koptu";
+            btStatus.style.color = "#ef4444";
+            bluetoothCharacteristic = null;
+        });
+
+    } catch (error) { 
+        console.error("Bluetooth Modül Hatası:", error);
+        btStatus.innerText = "Bulunamadı!"; 
+        btStatus.style.color = "#ef4444"; 
+        bluetoothCharacteristic = null;
+        
+        // Kullanıcıya rehberlik eden bilgilendirme mesajı
+        alert("Cihaz Bulunamadı!\n\nEğer HC-05/HC-06 veya klasik Bluetooth modülü kullanıyorsanız, mobil tarayıcılar (Chrome/Opera) güvenlik nedeniyle bu cihazları listelemez. Bu sistemi kullanmak için HM-10, AT-09 veya ESP32 gibi bir BLE (Bluetooth Low Energy) modülü kullanmanız gerekir.");
+    }
 });
 
+// Veri Paketleyici
 function sendBluetoothData(key, state) {
-    console.log(`Veri -> ${key}:${state}`);
     if (bluetoothCharacteristic) {
         try {
             let encoder = new TextEncoder('utf-8');
             let data = encoder.encode(`${key}:${state}\n`);
             bluetoothCharacteristic.writeValue(data);
-        } catch (e) { console.error(e); }
+        } catch (e) { console.error("Gönderim Hatası:", e); }
     }
 }
-
 // SMART TEMA ENGINE DİNAMİKLERİ
 bgColorPicker.addEventListener('input', e => {
     config.bgColor = e.target.value; document.body.style.backgroundColor = config.bgColor;
