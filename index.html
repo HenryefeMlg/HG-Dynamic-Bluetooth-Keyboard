@@ -4,7 +4,63 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Gelişmiş Sanal Kumanda Konsolu</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        /* --- CSS KODLARI --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #121214; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #fff; }
+
+        #top-bar { position: absolute; top: 15px; left: 15px; z-index: 10; display: flex; gap: 10px; }
+        .icon-btn { background: #29292e; border: 1px solid #4d4d57; color: white; font-size: 14px; padding: 10px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; }
+        #lock-btn.edit-active { background: #ff9800; color: #121214; border-color: #ff9800; }
+
+        #gamepad-area { width: 100%; height: 100%; position: relative; }
+        #info-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: rgba(255, 255, 255, 0.2); text-align: center; pointer-events: none; }
+
+        /* YAN PANEL */
+        #settings-panel { position: absolute; top: 0; left: 0; width: 100%; max-width: 360px; height: 100%; background: #1a1a1e; border-right: 2px solid #29292e; z-index: 100; display: flex; flex-direction: column; transition: transform 0.3s ease; }
+        #settings-panel.hidden { transform: translateX(-100%); }
+        .panel-header { padding: 20px; background: #29292e; display: flex; justify-content: space-between; align-items: center; }
+        #close-settings-btn { background: none; border: none; color: #ef4444; font-size: 20px; cursor: pointer; }
+        .panel-content { padding: 20px; overflow-y: auto; flex: 1; user-select: text !important; -webkit-user-select: text !important; touch-action: pan-y !important; }
+
+        .setting-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 6px; color: #a8a8b3; font-size: 13px; }
+        input[type="text"], select { width: 100%; padding: 10px; background: #121214; border: 1px solid #4d4d57; border-radius: 6px; color: #fff; font-weight: bold; text-align: center; }
+        input[type="color"] { width: 100%; height: 40px; border: none; border-radius: 6px; background: none; cursor: pointer; }
+        button { width: 100%; padding: 12px; background: #00e676; border: none; border-radius: 6px; color: #121214; font-weight: bold; font-size: 13px; cursor: pointer; }
+        button:active { opacity: 0.8; }
+        #connect-bt-btn { background: #2196f3; color: white; }
+        #save-layout-btn { background: #ff9800; color: white; }
+        hr { border: 0; border-top: 1px solid #29292e; margin: 15px 0; }
+
+        /* OTOMATİK TAMAMLAMA */
+        .autocomplete-suggestions { position: absolute; top: 105%; left: 0; right: 0; background: #29292e; border: 1px solid #4d4d57; border-radius: 6px; max-height: 130px; overflow-y: auto; z-index: 9999; }
+        .autocomplete-suggestions.hidden { display: none; }
+        .suggestion-item { padding: 10px; cursor: pointer; color: #fff; text-align: left; font-size: 13px; border-bottom: 1px solid #1a1a1e; }
+        .suggestion-item:hover { background: #00e676; color: #121214; font-weight: bold; }
+
+        /* KOMBİNASYON */
+        .combo-row { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; background: #121214; padding: 8px; border-radius: 6px; border: 1px solid #4d4d57; }
+        .combo-box-input { flex: 1; min-width: 60px; max-width: 100px; padding: 6px !important; font-size: 12px !important; }
+        .combo-plus { color: #00e676; font-weight: bold; font-size: 16px; }
+
+        /* BUTONLAR VE JOYSTICK */
+        .custom-btn { position: absolute; border: 2px solid #00e676; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; text-align: center; padding: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25); touch-action: none; font-size: 13px; min-width: 65px; min-height: 65px; }
+        .custom-btn.macro-type { border-color: #e91e63; border-radius: 8px; }
+        .custom-btn.combo-type { border-color: #ff9800; border-radius: 20px; }
+        .btn-subtext { font-size: 9px; opacity: 0.6; margin-top: 2px; font-weight: normal; }
+
+        body.edit-mode-on .custom-btn, body.edit-mode-on .custom-joystick { outline: 2px dashed #ff9800 !important; outline-offset: 4px; cursor: move; }
+
+        .custom-joystick { position: absolute; width: 120px; height: 120px; background: rgba(255, 255, 255, 0.05); border: 3px solid #2196f3; border-radius: 50%; touch-action: none; display: flex; align-items: center; justify-content: center; }
+        .custom-joystick.wasd-type { border-color: #9c27b0; }
+        .joystick-knob { position: absolute; width: 50px; height: 50px; background: #2196f3; border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; }
+        .custom-joystick.wasd-type .joystick-knob { background: #9c27b0; }
+
+        /* DİNAMİK TUŞ SİLME BUTONU (YENİ) */
+        .delete-btn { position: absolute; top: -8px; right: -8px; width: 22px; height: 22px; background: #ef4444; color: white; border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; cursor: pointer; z-index: 99; border: 1px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+        body.edit-mode-on .delete-btn { display: flex; }
+    </style>
 </head>
 <body>
 
@@ -25,8 +81,8 @@
         <div class="panel-content">
             
             <div class="setting-group">
-                <button id="connect-bt-btn">🔗 Bluetooth Cihazına Bağlan</button>
-                <span id="bt-status">Bağlı Değil</span>
+                <button id="connect-bt-btn">🔗 Bluetooth (BLE) Bağlan</button>
+                <div style="margin-top: 5px; font-size: 12px; color: #a8a8b3;">Durum: <span id="bt-status" style="color: #ff9800;">Bağlı Değil</span></div>
             </div>
             <hr>
 
@@ -70,7 +126,6 @@
 
             <div class="setting-group">
                 <label><strong>3. Kombinasyon Butonu Ekle (Kutu + Kutu)</strong></label>
-                
                 <div id="combo-boxes-container">
                     <div class="combo-row">
                         <input type="text" class="combo-box-input" placeholder="Ctrl" autocomplete="off">
@@ -78,12 +133,10 @@
                         <input type="text" class="combo-box-input" placeholder="C" autocomplete="off">
                     </div>
                 </div>
-
                 <div style="display: flex; gap: 5px; margin-top: 8px;">
                     <button id="add-combo-box-field" style="background: #795548; color: white; padding: 8px;">➕ Kutu Ekle</button>
                     <button id="remove-combo-box-field" style="background: #ff5722; color: white; padding: 8px;">🗑️ Son Kutuyu Sil</button>
                 </div>
-
                 <button id="add-combo-btn" style="background: #ff9800; color: white; margin-top: 8px;">🎛️ Kombinasyon Butonunu Ekle</button>
             </div>
             <hr>
@@ -95,17 +148,162 @@
         </div>
     </div>
 
-    <div id="custom-confirm" class="confirm-overlay hidden">
-        <div class="confirm-box">
-            <h4>Akıllı Renk Uyumu</h4>
-            <p id="confirm-message">Renk düzeni algılanıyor...</p>
-            <div class="confirm-buttons">
-                <button id="confirm-yes" style="background: #00e676; color: #121214;">Evet, Ayarla</button>
-                <button id="confirm-no" style="background: #ef4444; color: white;">Hayır, Kalsın</button>
-            </div>
-        </div>
-    </div>
+    <script>
+        /* --- JAVASCRIPT KODLARI --- */
+        let bluetoothDevice = null;
+        let bluetoothCharacteristic = null;
+        let isEditMode = false;
 
-    <script src="script.js"></script>
-</body>
-</html>
+        let config = { bgColor: "#121214", btnColor: "#00e676", textColor: "#121214" };
+
+        const UART_SERVICE_UUID = "0000ffe0-0000-1000-8000-00805f9b34fb"; 
+        const UART_TX_CHARACTERISTIC_UUID = "0000ffe1-0000-1000-8000-00805f9b34fb";
+
+        const AVAILABLE_KEYS = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z","Ctrl","Alt","Shift","Space","Enter","Escape","Tab","F1","F2"];
+
+        // DOM Elemanları
+        const lockBtn = document.getElementById('lock-btn');
+        const settingsBtn = document.getElementById('settings-btn');
+        const settingsPanel = document.getElementById('settings-panel');
+        const closeSettingsBtn = document.getElementById('close-settings-btn');
+        const keyInput = document.getElementById('key-input');
+        const autocompleteList = document.getElementById('autocomplete-list');
+        const gamepadArea = document.getElementById('gamepad-area');
+        const infoText = document.getElementById('info-text');
+        
+        const connectBtBtn = document.getElementById('connect-bt-btn');
+        const btStatus = document.getElementById('bt-status');
+        const macroStringInput = document.getElementById('macro-string-input');
+        const addMacroStringBtn = document.getElementById('add-macro-string-btn');
+        const comboBoxesContainer = document.getElementById('combo-boxes-container');
+
+        const bgColorPicker = document.getElementById('bg-color-picker');
+        const btnColorPicker = document.getElementById('btn-color-picker');
+        const textColorPicker = document.getElementById('text-color-picker');
+        const saveLayoutBtn = document.getElementById('save-layout-btn');
+        const clearLayoutBtn = document.getElementById('clear-layout-btn');
+
+        // Menü Aç/Kapa
+        settingsBtn.addEventListener('click', () => settingsPanel.classList.remove('hidden'));
+        closeSettingsBtn.addEventListener('click', () => settingsPanel.classList.add('hidden'));
+
+        // Düzenleme Kilidi Aç/Kapa
+        lockBtn.addEventListener('click', () => {
+            isEditMode = !isEditMode;
+            document.body.classList.toggle('edit-mode-on', isEditMode);
+            lockBtn.classList.toggle('edit-active', isEditMode);
+            lockBtn.innerText = isEditMode ? "✏️ Düzenleme Açık" : "🔒 Düzenleme Modu";
+        });
+
+        // RENK SEÇİCİ TETİKLEYİCİLERİ
+        bgColorPicker.addEventListener('input', (e) => { document.body.style.backgroundColor = e.target.value; config.bgColor = e.target.value; });
+        btnColorPicker.addEventListener('input', (e) => { config.btnColor = e.target.value; document.querySelectorAll('.custom-btn').forEach(btn => { btn.style.backgroundColor = config.btnColor; btn.style.borderColor = config.btnColor; }); });
+        textColorPicker.addEventListener('input', (e) => { config.textColor = e.target.value; document.querySelectorAll('.custom-btn').forEach(btn => { btn.style.color = config.textColor; }); });
+
+        // WEB BLUETOOTH API BAĞLANTI MOTORU
+        connectBtBtn.addEventListener('click', async () => {
+            if (!navigator.bluetooth) { alert("Tarayıcınız Web Bluetooth API'yi desteklemiyor. Lütfen Android'de Google Chrome kullanın."); return; }
+            try {
+                btStatus.innerText = "Cihaz Aranıyor..."; btStatus.style.color = "#2196f3";
+                bluetoothDevice = await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: [UART_SERVICE_UUID] });
+                btStatus.innerText = "Bağlanıyor...";
+                const server = await bluetoothDevice.gatt.connect();
+                const service = await server.getPrimaryService(UART_SERVICE_UUID);
+                bluetoothCharacteristic = await service.getCharacteristic(UART_TX_CHARACTERISTIC_UUID);
+                btStatus.innerText = "Bağlandı 🟢"; btStatus.style.color = "#00e676";
+                bluetoothDevice.addEventListener('gattserverdisconnected', () => { btStatus.innerText = "Bağlantı Koptu 🔴"; btStatus.style.color = "#ef4444"; bluetoothCharacteristic = null; });
+            } catch (error) { console.error(error); btStatus.innerText = "Hata / İptal"; btStatus.style.color = "#ef4444"; }
+        });
+
+        function sendBluetoothData(cmd, status) {
+            let msg = `${cmd}:${status}\n`;
+            console.log("Gönderilen Veri:", msg);
+            if (!bluetoothCharacteristic) return;
+            let encoder = new TextEncoder('utf-8');
+            bluetoothCharacteristic.writeValue(encoder.encode(msg)).catch(err => console.error(err));
+        }
+
+        // OTOMATİK TAMAMLAMA SİSTEMİ
+        keyInput.addEventListener('input', () => {
+            let val = keyInput.value.trim().toLowerCase(); autocompleteList.innerHTML = '';
+            if (!val) { autocompleteList.classList.add('hidden'); return; }
+            let filtered = AVAILABLE_KEYS.filter(k => k.toLowerCase().includes(val));
+            if (filtered.length > 0) {
+                autocompleteList.classList.remove('hidden');
+                filtered.forEach(key => {
+                    let item = document.createElement('div'); item.className = 'suggestion-item'; item.innerText = key;
+                    item.addEventListener('click', () => { keyInput.value = key; autocompleteList.classList.add('hidden'); });
+                    autocompleteList.appendChild(item);
+                });
+            } else { autocompleteList.classList.add('hidden'); }
+        });
+
+        // DİNAMİK KOMBİNASYON GİRİŞ SİSTEMİ
+        document.getElementById('add-combo-box-field').addEventListener('click', () => {
+            const wrapper = comboBoxesContainer.querySelector('.combo-row');
+            const plusSpan = document.createElement('span'); plusSpan.className = 'combo-plus'; plusSpan.innerText = '+';
+            const newInput = document.createElement('input'); newInput.type = 'text'; newInput.className = 'combo-box-input'; newInput.placeholder = 'Tuş';
+            wrapper.appendChild(plusSpan); wrapper.appendChild(newInput);
+        });
+
+        document.getElementById('remove-combo-box-field').addEventListener('click', () => {
+            const wrapper = comboBoxesContainer.querySelector('.combo-row');
+            const inputs = wrapper.querySelectorAll('.combo-box-input'); const symbols = wrapper.querySelectorAll('.combo-plus');
+            if (inputs.length > 2) { inputs[inputs.length - 1].remove(); symbols[symbols.length - 1].remove(); }
+        });
+
+        // PANEL BUTON TETİKLEYİCİLERİ
+        document.getElementById('add-button-btn').addEventListener('click', () => { let key = keyInput.value.trim(); if(!key) return; infoText.style.display = 'none'; createButtonElement('standard', key, '100px', '100px'); settingsPanel.classList.add('hidden'); });
+        addMacroStringBtn.addEventListener('click', () => { let str = macroStringInput.value; if(!str) return; infoText.style.display = 'none'; createButtonElement('macro', str, '100px', '100px'); settingsPanel.classList.add('hidden'); });
+        document.getElementById('add-combo-btn').addEventListener('click', () => {
+            const inputs = comboBoxesContainer.querySelectorAll('.combo-box-input'); let keysArr = [];
+            inputs.forEach(inp => { if(inp.value.trim()) keysArr.push(inp.value.trim()); });
+            if(keysArr.length < 2) return; infoText.style.display = 'none'; createButtonElement('combo', keysArr.join('+'), '100px', '100px'); settingsPanel.classList.add('hidden');
+        });
+
+        document.getElementById('add-normal-joy-btn').addEventListener('click', () => { infoText.style.display = 'none'; createJoystickElement('normal', '80px', '150px'); settingsPanel.classList.add('hidden'); });
+        document.getElementById('add-wasd-joy-btn').addEventListener('click', () => { infoText.style.display = 'none'; createJoystickElement('wasd', '80px', '150px'); settingsPanel.classList.add('hidden'); });
+
+        // DİNAMİK ELEMAN SİLME YETENEĞİ (YENİ)
+        function addDeleteButton(el) {
+            const delBtn = document.createElement('div');
+            delBtn.className = 'delete-btn';
+            delBtn.innerText = '×';
+            delBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); 
+                el.remove();
+                if (document.querySelectorAll('.custom-btn, .custom-joystick').length === 0) { infoText.style.display = 'block'; }
+            });
+            el.appendChild(delBtn);
+        }
+
+        // ELEMENT ÜRETİM FABRİKALARI
+        function createButtonElement(subType, coreValue, left, top) {
+            const btn = document.createElement('div');
+            btn.className = 'custom-btn';
+            btn.style.left = left; btn.style.top = top;
+            btn.style.backgroundColor = config.btnColor; btn.style.borderColor = config.btnColor; btn.style.color = config.textColor;
+            btn.dataset.subtype = subType; btn.dataset.value = coreValue;
+
+            if (subType === 'standard') btn.innerText = coreValue;
+            else if (subType === 'macro') { btn.classList.add('macro-type'); btn.innerHTML = `📝 Metin <span class="btn-subtext">"${coreValue.substring(0,8)}..."</span>`; }
+            else if (subType === 'combo') { btn.classList.add('combo-type'); btn.innerHTML = `🎛️ Kombo <span class="btn-subtext">${coreValue}</span>`; }
+
+            gamepadArea.appendChild(btn);
+            addDeleteButton(btn);
+            makeElementFlexible(btn);
+        }
+
+        function createJoystickElement(type, left, top) {
+            const joy = document.createElement('div');
+            joy.className = `custom-joystick ${type === 'wasd' ? 'wasd-type' : ''}`;
+            joy.style.left = left; joy.style.top = top;
+            joy.dataset.elementtype = 'joystick';
+            joy.dataset.joytype = type;
+            
+            const knob = document.createElement('div');
+            knob.className = 'joystick-knob';
+            joy.appendChild(knob);
+            
+            gamepadArea.appendChild(joy);
+            addDeleteButton(j
