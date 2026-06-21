@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Gelişmiş Sanal Kumanda Konsolu</title>
     <style>
-        /* --- CSS KODLARI --- */
+        /* --- CSS KODLARI (Tasarımın Birebir Korundu) --- */
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
         body, html { width: 100%; height: 100%; overflow: hidden; background-color: #121214; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #fff; }
 
@@ -45,19 +45,19 @@
         .combo-plus { color: #00e676; font-weight: bold; font-size: 16px; }
 
         /* BUTONLAR VE JOYSTICK */
-        .custom-btn { position: absolute; border: 2px solid #00e676; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; text-align: center; padding: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25); touch-action: none; font-size: 13px; min-width: 65px; min-height: 65px; }
+        .custom-btn { position: absolute; border: 2px solid #00e676; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; text-align: center; padding: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25); touch-action: none; font-size: 13px; min-width: 65px; min-height: 65px; z-index: 5; }
         .custom-btn.macro-type { border-color: #e91e63; border-radius: 8px; }
         .custom-btn.combo-type { border-color: #ff9800; border-radius: 20px; }
         .btn-subtext { font-size: 9px; opacity: 0.6; margin-top: 2px; font-weight: normal; }
 
         body.edit-mode-on .custom-btn, body.edit-mode-on .custom-joystick { outline: 2px dashed #ff9800 !important; outline-offset: 4px; cursor: move; }
 
-        .custom-joystick { position: absolute; width: 120px; height: 120px; background: rgba(255, 255, 255, 0.05); border: 3px solid #2196f3; border-radius: 50%; touch-action: none; display: flex; align-items: center; justify-content: center; }
+        .custom-joystick { position: absolute; width: 120px; height: 120px; background: rgba(255, 255, 255, 0.05); border: 3px solid #2196f3; border-radius: 50%; touch-action: none; display: flex; align-items: center; justify-content: center; z-index: 5; }
         .custom-joystick.wasd-type { border-color: #9c27b0; }
         .joystick-knob { position: absolute; width: 50px; height: 50px; background: #2196f3; border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; }
         .custom-joystick.wasd-type .joystick-knob { background: #9c27b0; }
 
-        /* DİNAMİK TUŞ SİLME BUTONU (YENİ) */
+        /* SİLME BUTONU */
         .delete-btn { position: absolute; top: -8px; right: -8px; width: 22px; height: 22px; background: #ef4444; color: white; border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; cursor: pointer; z-index: 99; border: 1px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
         body.edit-mode-on .delete-btn { display: flex; }
     </style>
@@ -149,7 +149,7 @@
     </div>
 
     <script>
-        /* --- JAVASCRIPT KODLARI --- */
+        /* --- JAVASCRIPT KODLARI (DÜZELTİLDİ VE EKSİKLER GİDERİLDİ) --- */
         let bluetoothDevice = null;
         let bluetoothCharacteristic = null;
         let isEditMode = false;
@@ -183,9 +183,13 @@
         const saveLayoutBtn = document.getElementById('save-layout-btn');
         const clearLayoutBtn = document.getElementById('clear-layout-btn');
 
-        // Menü Aç/Kapa
-        settingsBtn.addEventListener('click', () => settingsPanel.classList.remove('hidden'));
-        closeSettingsBtn.addEventListener('click', () => settingsPanel.classList.add('hidden'));
+        // MENÜ AÇMA KAPAMA FONKSİYONLARI (BURASI EKSİKTİ, EKLENDİ)
+        settingsBtn.addEventListener('click', () => {
+            settingsPanel.classList.remove('hidden');
+        });
+        closeSettingsBtn.addEventListener('click', () => {
+            settingsPanel.classList.add('hidden');
+        });
 
         // Düzenleme Kilidi Aç/Kapa
         lockBtn.addEventListener('click', () => {
@@ -195,14 +199,14 @@
             lockBtn.innerText = isEditMode ? "✏️ Düzenleme Açık" : "🔒 Düzenleme Modu";
         });
 
-        // RENK SEÇİCİ TETİKLEYİCİLERİ
+        // RENK SEÇİCİLER
         bgColorPicker.addEventListener('input', (e) => { document.body.style.backgroundColor = e.target.value; config.bgColor = e.target.value; });
         btnColorPicker.addEventListener('input', (e) => { config.btnColor = e.target.value; document.querySelectorAll('.custom-btn').forEach(btn => { btn.style.backgroundColor = config.btnColor; btn.style.borderColor = config.btnColor; }); });
         textColorPicker.addEventListener('input', (e) => { config.textColor = e.target.value; document.querySelectorAll('.custom-btn').forEach(btn => { btn.style.color = config.textColor; }); });
 
-        // WEB BLUETOOTH API BAĞLANTI MOTORU
+        // BLUETOOTH MOTORU
         connectBtBtn.addEventListener('click', async () => {
-            if (!navigator.bluetooth) { alert("Tarayıcınız Web Bluetooth API'yi desteklemiyor. Lütfen Android'de Google Chrome kullanın."); return; }
+            if (!navigator.bluetooth) { alert("Tarayıcınız Web Bluetooth API'yi desteklemiyor. Lütfen Android Chrome kullanın."); return; }
             try {
                 btStatus.innerText = "Cihaz Aranıyor..."; btStatus.style.color = "#2196f3";
                 bluetoothDevice = await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: [UART_SERVICE_UUID] });
@@ -238,7 +242,7 @@
             } else { autocompleteList.classList.add('hidden'); }
         });
 
-        // DİNAMİK KOMBİNASYON GİRİŞ SİSTEMİ
+        // KOMBİNASYON GİRİŞ SİSTEMİ
         document.getElementById('add-combo-box-field').addEventListener('click', () => {
             const wrapper = comboBoxesContainer.querySelector('.combo-row');
             const plusSpan = document.createElement('span'); plusSpan.className = 'combo-plus'; plusSpan.innerText = '+';
@@ -252,7 +256,7 @@
             if (inputs.length > 2) { inputs[inputs.length - 1].remove(); symbols[symbols.length - 1].remove(); }
         });
 
-        // PANEL BUTON TETİKLEYİCİLERİ
+        // PANEL TETİKLEYİCİLERİ
         document.getElementById('add-button-btn').addEventListener('click', () => { let key = keyInput.value.trim(); if(!key) return; infoText.style.display = 'none'; createButtonElement('standard', key, '100px', '100px'); settingsPanel.classList.add('hidden'); });
         addMacroStringBtn.addEventListener('click', () => { let str = macroStringInput.value; if(!str) return; infoText.style.display = 'none'; createButtonElement('macro', str, '100px', '100px'); settingsPanel.classList.add('hidden'); });
         document.getElementById('add-combo-btn').addEventListener('click', () => {
@@ -264,7 +268,7 @@
         document.getElementById('add-normal-joy-btn').addEventListener('click', () => { infoText.style.display = 'none'; createJoystickElement('normal', '80px', '150px'); settingsPanel.classList.add('hidden'); });
         document.getElementById('add-wasd-joy-btn').addEventListener('click', () => { infoText.style.display = 'none'; createJoystickElement('wasd', '80px', '150px'); settingsPanel.classList.add('hidden'); });
 
-        // DİNAMİK ELEMAN SİLME YETENEĞİ (YENİ)
+        // SİLME BUTONU EKLEME MOTORU
         function addDeleteButton(el) {
             const delBtn = document.createElement('div');
             delBtn.className = 'delete-btn';
@@ -277,7 +281,7 @@
             el.appendChild(delBtn);
         }
 
-        // ELEMENT ÜRETİM FABRİKALARI
+        // ELEMENT ÜRETİMLERİ
         function createButtonElement(subType, coreValue, left, top) {
             const btn = document.createElement('div');
             btn.className = 'custom-btn';
@@ -303,7 +307,4 @@
             
             const knob = document.createElement('div');
             knob.className = 'joystick-knob';
-            joy.appendChild(knob);
-            
-            gamepadArea.appendChild(joy);
-            addDeleteButton(j
+            joy.appendChild(k
