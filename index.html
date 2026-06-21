@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Gelişmiş Sanal Kumanda Konsolu</title>
     <style>
-        /* --- CSS KODLARI (Tasarımın Birebir Korundu) --- */
+        /* --- CSS KODLARI --- */
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
         body, html { width: 100%; height: 100%; overflow: hidden; background-color: #121214; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #fff; }
 
@@ -45,12 +45,16 @@
         .combo-plus { color: #00e676; font-weight: bold; font-size: 16px; }
 
         /* BUTONLAR VE JOYSTICK */
-        .custom-btn { position: absolute; border: 2px solid #00e676; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; text-align: center; padding: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25); touch-action: none; font-size: 13px; min-width: 65px; min-height: 65px; z-index: 5; }
+        .custom-btn { position: absolute; border: 2px solid #00e676; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; text-align: center; padding: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25); touch-action: none; font-size: 13px; min-width: 65px; min-height: 65px; z-index: 5; transition: background 0.1s, transform 0.05s; }
         .custom-btn.macro-type { border-color: #e91e63; border-radius: 8px; }
         .custom-btn.combo-type { border-color: #ff9800; border-radius: 20px; }
         .btn-subtext { font-size: 9px; opacity: 0.6; margin-top: 2px; font-weight: normal; }
 
+        /* BASILMA EFEKTİ (Geri Geldi 🔵) */
+        .custom-btn:active { background: #2196f3 !important; border-color: #2196f3 !important; color: #fff !important; transform: scale(0.92); }
+
         body.edit-mode-on .custom-btn, body.edit-mode-on .custom-joystick { outline: 2px dashed #ff9800 !important; outline-offset: 4px; cursor: move; }
+        body.edit-mode-on .custom-btn:active { background: initial; transform: none; }
 
         .custom-joystick { position: absolute; width: 120px; height: 120px; background: rgba(255, 255, 255, 0.05); border: 3px solid #2196f3; border-radius: 50%; touch-action: none; display: flex; align-items: center; justify-content: center; z-index: 5; }
         .custom-joystick.wasd-type { border-color: #9c27b0; }
@@ -149,7 +153,7 @@
     </div>
 
     <script>
-        /* --- JAVASCRIPT KODLARI (DÜZELTİLDİ VE EKSİKLER GİDERİLDİ) --- */
+        /* --- JAVASCRIPT KODLARI --- */
         let bluetoothDevice = null;
         let bluetoothCharacteristic = null;
         let isEditMode = false;
@@ -183,13 +187,9 @@
         const saveLayoutBtn = document.getElementById('save-layout-btn');
         const clearLayoutBtn = document.getElementById('clear-layout-btn');
 
-        // MENÜ AÇMA KAPAMA FONKSİYONLARI (BURASI EKSİKTİ, EKLENDİ)
-        settingsBtn.addEventListener('click', () => {
-            settingsPanel.classList.remove('hidden');
-        });
-        closeSettingsBtn.addEventListener('click', () => {
-            settingsPanel.classList.add('hidden');
-        });
+        // Menü Açma Kapama
+        settingsBtn.addEventListener('click', () => settingsPanel.classList.remove('hidden'));
+        closeSettingsBtn.addEventListener('click', () => settingsPanel.classList.add('hidden'));
 
         // Düzenleme Kilidi Aç/Kapa
         lockBtn.addEventListener('click', () => {
@@ -199,7 +199,7 @@
             lockBtn.innerText = isEditMode ? "✏️ Düzenleme Açık" : "🔒 Düzenleme Modu";
         });
 
-        // RENK SEÇİCİLER
+        // Renk Seçiciler
         bgColorPicker.addEventListener('input', (e) => { document.body.style.backgroundColor = e.target.value; config.bgColor = e.target.value; });
         btnColorPicker.addEventListener('input', (e) => { config.btnColor = e.target.value; document.querySelectorAll('.custom-btn').forEach(btn => { btn.style.backgroundColor = config.btnColor; btn.style.borderColor = config.btnColor; }); });
         textColorPicker.addEventListener('input', (e) => { config.textColor = e.target.value; document.querySelectorAll('.custom-btn').forEach(btn => { btn.style.color = config.textColor; }); });
@@ -256,7 +256,7 @@
             if (inputs.length > 2) { inputs[inputs.length - 1].remove(); symbols[symbols.length - 1].remove(); }
         });
 
-        // PANEL TETİKLEYİCİLERİ
+        // PANEL BUTON TETİKLEYİCİLERİ
         document.getElementById('add-button-btn').addEventListener('click', () => { let key = keyInput.value.trim(); if(!key) return; infoText.style.display = 'none'; createButtonElement('standard', key, '100px', '100px'); settingsPanel.classList.add('hidden'); });
         addMacroStringBtn.addEventListener('click', () => { let str = macroStringInput.value; if(!str) return; infoText.style.display = 'none'; createButtonElement('macro', str, '100px', '100px'); settingsPanel.classList.add('hidden'); });
         document.getElementById('add-combo-btn').addEventListener('click', () => {
@@ -268,7 +268,7 @@
         document.getElementById('add-normal-joy-btn').addEventListener('click', () => { infoText.style.display = 'none'; createJoystickElement('normal', '80px', '150px'); settingsPanel.classList.add('hidden'); });
         document.getElementById('add-wasd-joy-btn').addEventListener('click', () => { infoText.style.display = 'none'; createJoystickElement('wasd', '80px', '150px'); settingsPanel.classList.add('hidden'); });
 
-        // SİLME BUTONU EKLEME MOTORU
+        // SİLME BUTONU
         function addDeleteButton(el) {
             const delBtn = document.createElement('div');
             delBtn.className = 'delete-btn';
@@ -303,8 +303,4 @@
             joy.className = `custom-joystick ${type === 'wasd' ? 'wasd-type' : ''}`;
             joy.style.left = left; joy.style.top = top;
             joy.dataset.elementtype = 'joystick';
-            joy.dataset.joytype = type;
-            
-            const knob = document.createElement('div');
-            knob.className = 'joystick-knob';
-            joy.appendChild(k
+            joy.datas
